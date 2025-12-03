@@ -54,7 +54,7 @@ LIST Items = cone, cube, sphere, watch
 
 === Main ===
 
-{!Welcome! This demo provides some examples for how to set up dialogue, quests, and a journal in InkPot.} # Linetime: 2.5
+{!Welcome! This demo provides some examples for how to set up dialogue, quests, and a journal in InkPot. # Linetime: 2.5} 
 
 {
     - QuestMeetEmmy !? ToldEmmyJournal:
@@ -123,6 +123,7 @@ Can you ask Blue what time it is?
     -> timequest
     
 * {QuestGetTime !? GotAnswer and InventoryItems !? watch} [Sure.]
+    ~ JournalEntries += EmmyTime
     Thanks! <>
 * {QuestGetTime ? GotAnswer and InventoryItems !? watch} [Blue doesn't like me very much.]
     Oh cool so the game told you to come talk to me and you wandered around the map antagonizing other NPCs instead. # Linetime: 2.5
@@ -139,7 +140,7 @@ Can you ask Blue what time it is?
     Doing the quests out of order, I see. I respect it.
     ~ QuestGetTime += ToldEmmyTime
 
-- I'm adding an entry on quests to your JOURNAL. # Linetime: 2
+- I'm adding an entry on quests to your JOURNAL.
 ~ QuestGetTime += EmmyAsked
 ~ JournalEntries += quests
 ~ JournalEntries += EmmyTime
@@ -198,7 +199,7 @@ Hi, I'm Blue.
 -
 ~ QuestGetTime += AskedTime
 
-Blue: Sorry, I'm busy looking for my {list_with_commas(shapes)}. If you find them for me, I'll tell you the time. # Linetime: 2
+Blue: Sorry, I'm busy looking for my {list_with_commas(shapes)}. If you find them for me, I'll tell you the time. # Linetime: 2.5
 
 -> shapesFetch
 
@@ -210,7 +211,7 @@ Blue: Sorry, I'm busy looking for my {list_with_commas(shapes)}. If you find the
 * [Can't you get them?]
     {NPC_Emmy.timequest.YouDoIt: Yeah look I'm not a nerd like Emmy; I'm not going to wax philisophic about narrative design.} # Linetime: 2.5
     
-    {QuestGetTime ? EmmyAsked: If you want to know the time, you'll need to get my shapes.|I can't get them myself--can you help me?} # Linetime: 2
+    {QuestGetTime ? EmmyAsked: If you want to know the time, you'll need to get my shapes.|I can't get them myself--can you help me?} # Linetime: 2.5
 
 - ~ JournalEntries += BlueShapes
 -> DONE
@@ -321,7 +322,7 @@ VAR JournalBookmark = -> empty_entry
 - -> DONE
 
 = empty_entry
-This is the player journal.
+This is the player journal.<br>
 
 You don't have any entries yet--you'll get a notification in the top right when entries are added.
 
@@ -332,13 +333,13 @@ You don't have any entries yet--you'll get a notification in the top right when 
 
 This is the player character's Journal.<br>
 
-In the Ink file, Journal entries each have their own stitch in the "Journal" knot.<b>
+In the Ink file, Journal entries each have their own stitch in the "Journal" knot.<br>
 
-Full instructions for adding journal entries can be found in README-AdventureDemo.md.
+Full instructions for adding journal entries can be found in README-AdventureDemo.md.<br>
 
-The quick version is that each entry is stored in a stitch within the Journal knot in the ink file. At the top of the knot, a sticky choice block handles the journal's table of contents, and lists all journal entries the player can currently see.
+The quick version is that each entry is stored in a stitch within the Journal knot in the ink file. At the top of the knot, a sticky choice block handles the journal's table of contents, and lists all journal entries the player can currently see.<br>
 
-The current entry the player is looking at is stored in the JournalBookmark variable in Ink. This ensures that when the player opens the journal, they'll be returned to the last viewed entry.
+The current entry the player is looking at is stored in the JournalBookmark variable in Ink. This ensures that when the player opens the journal, they'll be returned to the last viewed entry.<br>
 
 The logic that controls showing/hiding the journal panel and updating the contents when the player chooses an entry from the list is found in WBP_Display_Adventure.
 
@@ -346,17 +347,17 @@ The logic that controls showing/hiding the journal panel and updating the conten
 
 = quests_entry
 
-Quests in this demo are making heavy use of LISTs as state machines to track the player's progress.
+Quests in this demo are making heavy use of LISTs as state machines to track the player's progress.<br>
 
-We're again using flow-switching to know when to display quest text. Text for each quest is stored in its own stitch in the Quests knot. Switching logic within the stitch will show the appropriate text depending on the player's progress.
+We're again using flow-switching to know when to display quest text. Text for each quest is stored in its own stitch in the Quests knot. Switching logic within the stitch will show the appropriate text depending on the player's progress.<br>
 
-At the moment, there's no Unreal-specific setup to do for quest text--it will be handled by the same Blueprint logic being used for dialogue.
+At the moment, there's no Unreal-specific setup to do for quest text--it will be handled by the same Blueprint logic being used for dialogue.<br>
 
-That's because there's no dedicated UI surface for Quest Text in this demo. Since it's not possible for the game to be in two flows at the same time, we can't display quest text and dialogue simultaneously--so they share a UI panel.
+That's because there's no dedicated UI surface for Quest Text in this demo. Since it's not possible for the game to be in two flows at the same time, we can't display quest text and dialogue simultaneously--so they share a UI panel.<br>
 
-Because quest text is ephemeral, the demo includes journal entries showing the current status of quests, so that the player can refer back to see what their current goals are.
+Because quest text is ephemeral, the demo includes journal entries showing the current status of quests, so that the player can refer back to see what their current goals are.<br>
 
-In a full game, it may make sense to keep the quest log in its own panel--but for the demo, the concepts are the same whether they're in the Journal panel or their own widget.
+In a full game, it may make sense to keep the quest log in its own panel--but for the demo, the concepts are the same whether they're in the Journal panel or their own widget.<br>
 
 -> DONE
 
@@ -397,10 +398,10 @@ Blue asked you to find her shapes before she'll give you the time.
 = dialogue_entry
 ~ QuestMeetEmmy += OpenedJournal
     
-The Dialogue pattern in this demo is using trigger volumes to initiate dialogue for each NPC, and each NPC has their own knot in the AdventureDemo.ink: NPC_Emmy and NPC_Blue.
+The Dialogue pattern in this demo is using trigger volumes to initiate dialogue for each NPC, and each NPC has their own knot in the AdventureDemo.ink: NPC_Emmy and NPC_Blue.<br>
 
-The logic to update the UI with each line of dialogue and handle player choices lives in `WBP_Display_Adventure`.
+The logic to update the UI with each line of dialogue and handle player choices lives in `WBP_Display_Adventure`.<br>
 
-Check README-AdventureDemo.ink for an explanation of Inkpot concepts including Flows and Reading Ink Tags and how they're used in this demo.
+Check README-AdventureDemo.ink for an explanation of Inkpot concepts including Flows and Reading Ink Tags and how they're used in this demo.<br>
 
 -> DONE
