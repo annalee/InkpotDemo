@@ -324,7 +324,14 @@ VAR JournalBookmark = -> empty_entry
 = empty_entry
 This is the player journal.<br>
 
-You don't have any entries yet--you'll get a notification in the top right when entries are added.
+{
+    - LIST_COUNT(JournalEntries) < 1:
+        You don't have any entries yet--you'll get a notification in the top right when entries are added.
+    - else:
+        Select a Journal Entry from the menu to view.
+}
+
+
 
 -> DONE
 
@@ -341,23 +348,31 @@ The quick version is that each entry is stored in a stitch within the Journal kn
 
 The current entry the player is looking at is stored in the JournalBookmark variable in Ink. This ensures that when the player opens the journal, they'll be returned to the last viewed entry.<br>
 
-The logic that controls showing/hiding the journal panel and updating the contents when the player chooses an entry from the list is found in WBP_Display_Adventure.
-
 -> DONE
 
 = quests_entry
 
-Quests in this demo are making heavy use of LISTs as state machines to track the player's progress.<br>
+(Note: you can find this info in README-AdventureDemo.md).<br>
 
-We're again using flow-switching to know when to display quest text. Text for each quest is stored in its own stitch in the Quests knot. Switching logic within the stitch will show the appropriate text depending on the player's progress.<br>
+INK SETUP:<br>
+
+Quests in this demo are making heavy use of LISTs as state machines to track the player's progress, as explained in the "Design Basics" section of README-AdventureDemo.md.<br>
+
+We're again using flow-switching to know when to display quest text. Text for each quest is stored in its own stitch in the Quests knot. When `Switch Flow to Path` is called from Unreal to access the stitch, switching logic within the stitch will show the appropriate text depending on the player's progress.<br>
+
+It's worth noting that quests don't need player-facing text of the sort you'd see in a quest log: you can track states of various storylines and use that information to impact the course of the narrative without popping up notices and instructions to the player. This demo uses pretty traditional style game quests in which the player runs errands to advance the story. But in a mystery game, for example: you might want to track the clues a player has seen without calling attention to the fact that they're important.<br>
+
+UNREAL SETUP:<br>
 
 At the moment, there's no Unreal-specific setup to do for quest text--it will be handled by the same Blueprint logic being used for dialogue.<br>
 
 That's because there's no dedicated UI surface for Quest Text in this demo. Since it's not possible for the game to be in two flows at the same time, we can't display quest text and dialogue simultaneously--so they share a UI panel.<br>
 
-Because quest text is ephemeral, the demo includes journal entries showing the current status of quests, so that the player can refer back to see what their current goals are.<br>
+(The journal also can't be displayed simultaneously, but since the Journal UI panel hides the main story panel, switching the flow to the journal and back is seamless for the player. It wouldn't make sense to interrupt dialogue to show quest updates).<br>
 
-In a full game, it may make sense to keep the quest log in its own panel--but for the demo, the concepts are the same whether they're in the Journal panel or their own widget.<br>
+The upshot is that you'll need to think about when to trigger quest text to make sure it's not interrupting other narrative text.<br>
+
+In the demo, we're triggering quest text when the player interacts with the shapes, and when the player leaves an NPC trigger volume and returns to the default flow. This makes sure it won't collide with dialogue.<br>
 
 -> DONE
 
@@ -402,6 +417,6 @@ The Dialogue pattern in this demo is using trigger volumes to initiate dialogue 
 
 The logic to update the UI with each line of dialogue and handle player choices lives in `WBP_Display_Adventure`.<br>
 
-Check README-AdventureDemo.ink for an explanation of Inkpot concepts including Flows and Reading Ink Tags and how they're used in this demo.<br>
+Check README-AdventureDemo.ink for an explanation of Inkpot concepts underpinning the dialogue implementation, including reading from Ink tags, switching flows, and switching flow to path.<br>
 
 -> DONE
