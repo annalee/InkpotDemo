@@ -82,48 +82,46 @@ The best way to avoid assumptions about the route a player has taken through the
 
 If you take a look at `AdventureDemo.ink`, you'll see that Quest LISTs are being queried throughout--especially in `if` statements at the tops of knots and stitches. This is the only flow control happening within ink: Unreal directs the flow to the knot or stitch, and these `if` statements route to the appropriate section based on the player's LIST states.
 
----
-
-**Inkpot Concept: Setting Variables**
-For the most part, the various state LISTs in this demo are being handled within Ink: new states are added when particular lines of Ink are run, and states are queried to direct to the correct content in a knot or stitch. Handling Ink variables in Ink should be preferred where possible, because it's usually simpler to manage.
-
-But where needed, Ink variables can be edited directly from Unreal. The Adventure Demo level blueprint is using Inkpot nodes to directly change variables in Ink in two places.
-
-Our first directly-set variable is `clocktime`. The Ink runtime has no way to access the system clock, so while we use the variable in Ink, we can't set it there. We declare it in Ink as an empty string, then update it from the level BP to a string of the player's current system time whenever they speak to Emmy.
-
-We do this with a `set value` node:
-
-![Screenshot of the Adventure Demo Level Blueprint showing a Set Value node connected to a Switch Flow to Path node. A collapsed "Get Time String" graph pulls the system clock time as a string and sets the Clocktime variable](Documentation/AD_SetValueClocktime.png)
-
-The second place we set variables directly is when the player overlaps the `Trigger Capsules` for the three shapes. `On Event Begin Overlap` nodes for these capsules are calling a custom `Add to list` function and adding each shape to the player's inventory (an Ink LIST) before switching to the FindShapes flow to show the player the appropriate quest text:
-
-![Screenshot from the Adventure Demo level blueprint, showing Inkpot Add to List nodes connected to On Actor Begin Overlap events for the trigger capsules surrounding the three shapes in the level. Each one adds the relevant shape from the Items list to the InventoryItems list](Documentation/AD_AddToList.png)
-
-Here's the `Add to List` function, which uses the Inkpot functions `Get List`, `To String Array`, and `Make Inkpot List from String Array` to pull the list from Ink and adds the indicated item:
-
-![](Documentation/AD_AddToListFunction.png)
-
-Once the player gets all three shapes, `QuestFindShapes.GotShapes` should be set to `true`. We could do this from Unreal by querying the Inventory LIST and checking if all three shapes are present--but since the blueprint always directs to `Quests.FindShapes_quest` after the player interacts with a shape, it's easier to set the state within Ink instead of doing additional round-trips to Unreal and back:
-
-```ink
-= FindShapes_quest
-
-{
-    - QuestFindShapes ? ToldBlue:
-        [...]
-    - InventoryItems ? (cone, cube, sphere):
-        ~ QuestFindShapes += GotShapes
-        [...]
-    - QuestFindShapes ? BlueAsked:
-        [...]
-}
-
--> DONE
-```
-
-**In summary**: manage Ink variables within Ink wherever practical--but don't be afraid to use Inkpot when a variable needs to change based on interactions with the world (as in our shapes), or when Ink lacks the functionality to do what you need. 
-
----
+>[!TIP]
+>**Inkpot Concept: Setting Variables**
+>
+>For the most part, the various state LISTs in this demo are being handled within Ink: new states are added when particular lines of Ink are run, and states are queried to direct to the correct content in a knot or stitch. Handling Ink variables in Ink should be preferred where possible, because it's usually simpler to manage.
+>
+>But where needed, Ink variables can be edited directly from Unreal. The Adventure Demo level blueprint is using Inkpot nodes to directly change variables in Ink in two places.
+>
+>Our first directly-set variable is `clocktime`. The Ink runtime has no way to access the system clock, so while we use the variable in Ink, we can't set it there. We declare it in Ink as an empty string, then update it from the level BP to a string of the player's current system time whenever they speak to Emmy.
+>
+>We do this with a `set value` node:
+>
+>![Screenshot of the Adventure Demo Level Blueprint showing a Set Value node connected to a Switch Flow to Path node. A collapsed "Get Time String" graph pulls the system clock time as a string and sets the Clocktime variable](Documentation/AD_SetValueClocktime.png)
+>
+>The second place we set variables directly is when the player overlaps the `Trigger Capsules` for the three shapes. `On Event Begin Overlap` nodes for these capsules are calling a custom `Add to list` function and adding each shape to the player's inventory (an Ink LIST) before switching to the FindShapes flow to show the player the appropriate quest text:
+>
+>![Screenshot from the Adventure Demo level blueprint, showing Inkpot Add to List nodes connected to On Actor Begin Overlap events for the trigger capsules surrounding the three shapes in the level. Each one adds the relevant shape from the Items list to the InventoryItems list](Documentation/AD_AddToList.png)
+>
+>Here's the `Add to List` function, which uses the Inkpot functions `Get List`, `To String Array`, and `Make Inkpot List from String Array` to pull the list from Ink and adds the indicated item:
+>
+>![Screenshot of a Blueprint function that adds an item to an Ink list using Inkpot](Documentation/AD_AddToListFunction.png)
+>
+>Once the player gets all three shapes, `QuestFindShapes.GotShapes` should be set to `true`. We could do this from Unreal by querying the Inventory LIST and checking if all three shapes are present--but since the blueprint always directs to `Quests.FindShapes_quest` after the player interacts with a shape, it's easier to set the state within Ink instead of doing additional round-trips to Unreal and back:
+>
+>```ink
+>= FindShapes_quest
+>
+>{
+>    - QuestFindShapes ? ToldBlue:
+>        [...]
+>   - InventoryItems ? (cone, cube, sphere):
+>       ~ QuestFindShapes += GotShapes
+>       [...]
+>   - QuestFindShapes ? BlueAsked:
+>       [...]
+>}
+>
+>-> DONE
+>```
+>
+>**In summary**: manage Ink variables within Ink wherever practical--but don't be afraid to use Inkpot when a variable needs to change based on interactions with the world (as in our shapes), or when Ink lacks the functionality to do what you need. 
 
 ### Interactions are knots and stitches
 
@@ -139,21 +137,19 @@ This design pattern connects each individual trigger event in the game world to 
 
 When one of these events happens in the game, Unreal will use the knot or stitch to pull the correct content. The player's path through that section of the Ink file will be managed within Ink. In order to take full advantage of flow management, each trigger (or related group of triggers, such as picking up shapes) should have its own flow.
 
----
+>[!TIP]
+>**Inkpot Concept: Switch Flow, Switch Path, and Switch Flow To Path**
+>
+>[The Inkpot Demo Readme](README.md) documents how to use flows to run separate sections of the Ink file in parallel.
+>
+>Players can move back and forth between flows and Inkpot will save their place so they can pick up where they left off when they return.
+>
+>You can switch flows using the Inkpot `Switch Flow` node, and you can direct the current flow to a particular knot or stitch using `Choose Path`. But the Inkpot Demo level has a handy function that will do both at once, called `Switch Flow To Path`:
+>
+>![A screenshot of the Switch Flow To Path function from the Inkpot Demo level, which switches the flow, sets the new path, and then continues](Documentation/AD_SwitchFlowToPathFunction.png)
+>
+>`Switch Flow To Path` is a handy shortcut you'll probably want to add to your project--the Adventure Demo design patterns use it often.
 
-**Inkpot Concept: Switch Flow, Switch Path, and Switch Flow To Path**
-
-[The Inkpot Demo Readme](README.md) documents how to use flows to run separate sections of the Ink file in parallel.
-
-Players can move back and forth between flows and Inkpot will save their place so they can pick up where they left off when they return.
-
-You can switch flows using the Inkpot `Switch Flow` node, and you can direct the current flow to a particular knot or stitch using `Choose Path`. But the Inkpot Demo level has a handy function that will do both at once, called `Switch Flow To Path`:
-
-![A screenshot of the Switch Flow To Path function from the Inkpot Demo level, which switches the flow, sets the new path, and then continues](Documentation/AD_SwitchFlowToPathFunction.png)
-
-`Switch Flow To Path` is a handy shortcut you'll probably want to add to your project--the Adventure Demo design patterns use it often.
-
----
 
 #### Knot or Stitch?
 In the demo, we are using both knots and stitches as interaction paths accessed directly from Unreal.
@@ -177,37 +173,33 @@ The Dialogue pattern in this demo is using trigger volumes to initiate dialogue 
 
 ![A screenshot of the level BP, showing OnEventBeginOverlap and EndOverlap nodes that call SwitchFlowToPath functions for each NPC's flow and knot](Documentation/AD_SwitchFlowToPathLevelBP.png)
 
----
-
-**Inkpot Concept: Switch Flow vs Switch Flow to Path**
-Flows allow Inkpot to keep track of multiple threads within the story--such as multiple NPC conversations--so that players can move between sections of the narrative without losing their place.
-
-In this example, however, we're using `Switch Flow To Path` for most of our flow switches, which always directs the flow to the top of the associated knot or stitch, rather than continuing where the player left off.
-
-Because the NPC knots contain multiple conversations, we want the flow to be directed back to the routing logic at the top of the knot to pick the appropriate conversation based on the player's LIST states. The same applies to pulling the correct quest text.
-
-But this demo doesn't lock player movement, so players can wander off in the middle of conversations--and when they come back, Ink will start the conversation again if the player's LIST states haven't changed.
-
-If you look at the `NPC_Emmy.intro` stitch, you'll see we're using the named line `EmmyGivesJournal` as a checkpoint so that Emmy doesn't introduce herself again if the player moves away after the intro.
-
----
-
 The logic to update the UI with each line of dialogue and handle player choices lives in `WBP_Display_Adventure`, and is largely unchanged from the Inkpot Demo level.
 
----
+>[!TIP]
+>**Inkpot Concept: Switch Flow vs Switch Flow to Path**
+>
+>Flows allow Inkpot to keep track of multiple threads within the story--such as multiple NPC conversations--so that players can move between sections of the narrative without losing their place.
+>
+>In this example, however, we're using `Switch Flow To Path` for most of our flow switches, which always directs the flow to the top of the associated knot or stitch, rather than continuing where the player left off.
+>
+>Because the NPC knots contain multiple conversations, we want the flow to be directed back to the routing logic at the top of the knot to pick the appropriate conversation based on the player's LIST states. The same applies to pulling the correct quest text.
+>
+>But this demo doesn't lock player movement, so players can wander off in the middle of conversations--and when they come back, Ink will start the conversation again if the player's LIST states haven't changed.
+>
+>If you look at the `NPC_Emmy.intro` stitch, you'll see we're using the named line `EmmyGivesJournal` as a checkpoint so that Emmy doesn't introduce herself again if the player moves away after the intro.
 
-**Inkpot Concept: Reading from tags**
-Inkpot contains nodes to read tags from Ink and use them within Unreal Blueprints. We have an example of this in the `Linetime: ` tags in AdventureDemo.ink.
-
-Inkpot lines can differ in length, which means they take different amounts of time to read.
-
-To handle this, there's logic in `WBP_Display_Adventure` to pull in the `Linetime` tag from Ink (Using the `Get Tag with Prefix and Strip` function, which, when given the prefix `Linetime: `, turn `Linetime: 2.5` to `2.5`) and pass the value into the `Set Timer by Event` node that times how long to show each line.
-
-![screenshot of a section of the WBP_Display_Adventure Blueprint, which is pulling the "Linetime: N" tags from the Ink file and using them to set the timer for how long to show each line. A MAX node sets a minumum line time of two seconds](Documentation/AD_LineTime.png)
-
-(The `max` node returns the _maximum_ of its two inputs, so the linetime will always be set to the longer of 2 seconds, or the time specified by the Line Tag. This default ensures that the line time won't be set to 0 if the tag is missing).
-
----
+>[!TIP]
+>**Inkpot Concept: Reading from tags**
+>
+>Inkpot contains nodes to read tags from Ink and use them within Unreal Blueprints. We have an example of this in the `Linetime: ` tags in AdventureDemo.ink.
+>
+>Inkpot lines can differ in length, which means they take different amounts of time to read.
+>
+>To handle this, there's logic in `WBP_Display_Adventure` to pull in the `Linetime` tag from Ink (Using the `Get Tag with Prefix and Strip` function, which, when given the prefix `Linetime: `, turn `Linetime: 2.5` to `2.5`) and pass the value into the `Set Timer by Event` node that times how long to show each line.
+>
+>![screenshot of a section of the WBP_Display_Adventure Blueprint, which is pulling the "Linetime: N" tags from the Ink file and using them to set the timer for how long to show each line. A MAX node sets a minumum line time of two seconds](Documentation/AD_LineTime.png)
+>
+>(The `max` node returns the _maximum_ of its two inputs, so the linetime will always be set to the longer of 2 seconds, or the time specified by the Line Tag. This default ensures that the line time won't be set to 0 if the tag is missing).
 
 ### Player Journal
 
@@ -237,7 +229,7 @@ Note: you need to differentiate the stitch name from the list item or the Ink in
 
 Add the text of your entry to this stitch, and end with a DONE divert.
 
-**Formatting note**: For demo purposes, the function ToTextFormat in WBP_Display_Adventure has a hard-coded Replace node to turn `<br>` into an additional newline, to make these entries easier to read. In your game, you'll almost certainly want to use a Rich Text box instead of MultiLine Text, and create a formatting style to double-space between paragraphs.
+**Formatting note**: For demo purposes, the function ToTextFormat in WBP_Display_Adventure has a hard-coded Replace node to turn `<br>` into an additional newline, to make these entries easier to read.
 
 #### Add it to the journal menu
 
@@ -262,14 +254,12 @@ Like so:
 
 #### Unreal Logic
 
----
-
-**Inkpot Concept: Flows aren't simultaneous**
-[The Inkpot Demo Readme](README.md) notes that flows allow us to run threads of the story "run at the same time," but it's important to note that Inkpot does not currently allow players to be in two flows _simultaneously_. Instead, Inkpot saves the player's place in each flow, and when they return to that flow, they pick up where they left off.
-
-The Journal implementation takes advantage of this to manage what happens when the player closes the journal. When the player opens the Journal panel, they switch into the Journal flow. When they close it, they return to the flow they were in previously and pick up where they left off.
-
----
+>[!TIP]
+>**Inkpot Concept: Flows aren't simultaneous**
+>
+>[The Inkpot Demo Readme](README.md) notes that flows allow us to run threads of the story "run at the same time," but it's important to note that Inkpot does not currently allow players to be in two flows _simultaneously_. Instead, Inkpot saves the player's place in each flow, and when they return to that flow, they pick up where they left off.
+>
+>The Journal implementation takes advantage of this to manage what happens when the player closes the journal. When the player opens the Journal panel, they switch into the Journal flow. When they close it, they return to the flow they were in previously and pick up where they left off.
 
 If you look at the Blueprint graph in `WBP_Display_Adventure`, you'll see the logic for the journal in two sections:
 
@@ -283,22 +273,23 @@ The "Update JournalEntry view with selected entry" section handles the logic for
 
 ![A screenshot from WBP_Display_Adventure, which contains logic for switching between journal entries](Documentation/AD_UpdateJournalEntry.png)
 
-The UpdateJournalView function populates the JournalEntryList panel with the entries the player can select:
+In addition to adding the selected entry text to the JournalEntry panel, the UpdateJournalView function populates the JournalEntryList panel with the entries the player can select:
 
 ![A screenshot from the UpdateJournalView function in WBP_Display_Adventure, which contains logic for displaying journal entry text and the journal entry menu](Documentation/AD_UpdateJournalView.png)
 
----
 
-**Inkpot Concept: Story Change Delegate**
-When the player gets access to new journal entries, a notification will pop up in the UI.
 
-This is triggered within `WBP_Display_Adventure`, using a Story Change Delegate:
+>[!TIP]
+>**Inkpot Concept: Story Change Delegate**
+>
+>When the player gets access to new journal entries, a notification will pop up in the UI.
+>
+>This is triggered within `WBP_Display_Adventure`, using a Story Change Delegate:
+>
+>![screenshot from `WBP_Display_Adventure` which uses a Set On Variable Change inkpot node to show a notification whenever the `JournalEntries` LIST is updated](Documentation/AD_ChangeDelegate.png)
+>
+>This allows game logic in Unreal (in this case, the Widget Blueprint) to get notified when an Ink variable changes, and kicks off a custom event--which in turn displays the "Journal updated" widget for two seconds.
 
-![screenshot from `WBP_Display_Adventure` which uses a Set On Variable Change inkpot node to show a notification whenever the `JournalEntries` LIST is updated](Documentation/AD_ChangeDelegate.png).
-
-This allows game logic in Unreal (in this case, the Widget Blueprint) to get notified when an Ink variable changes, and kicks off a custom event--which in turn displays the "Journal updated" widget for two seconds.
-
----
 
 ### Quests
 
