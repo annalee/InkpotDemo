@@ -211,7 +211,7 @@ Blue: Sorry, I'm busy looking for my {list_with_commas(shapes)}. If you find the
 * [Can't you get them?]
     {NPC_Emmy.timequest.YouDoIt: Yeah look I'm not a nerd like Emmy; I'm not going to wax philisophic about narrative design.} # Linetime: 2.5
     
-    {QuestGetTime ? EmmyAsked: If you want to know the time, you'll need to get my shapes.|I can't get them myself--can you help me?} # Linetime: 2.5
+    {QuestGetTime ? EmmyAsked: If you want to know the time, you'll need to get my shapes.|I can't get them myself because reasons--can you help me?} # Linetime: 2.5
 
 - ~ JournalEntries += BlueShapes
 -> DONE
